@@ -61,10 +61,6 @@
 
 </div>
 
-
-
-
-
 ---
 
 ## 🔬 研究方向
@@ -108,48 +104,51 @@
 
 ## 🚀 代表项目
 
-<table>
+<table align="center">
   <tr>
-    <td width="50%">
+    <td width="50%" align="center" valign="top">
       <h3>🌧️ MSLKAD</h3>
-      <p>
+      <p align="center">
         面向单图去雨任务的多尺度大核注意力模型，关注雨纹建模、
         多尺度上下文感知和高质量图像恢复。
       </p>
-      <a href="https://github.com/Easesgr/MSLKAD">
-        <img src="https://github-readme-stats.vercel.app/api/pin/?username=Easesgr&repo=MSLKAD&theme=transparent&hide_border=true" />
-      </a>
+      <p align="center">
+        <a href="https://github.com/Easesgr/MSLKAD"><b>查看项目 →</b></a>
+      </p>
     </td>
-    <td width="50%">
+
+    <td width="50%" align="center" valign="top">
       <h3>🧠 CDMIR</h3>
-      <p>
+      <p align="center">
         面向统一图像复原的研究项目，探索多退化建模、提示学习、
         编解码特征调制和任务自适应恢复机制。
       </p>
-      <a href="https://github.com/Easesgr/CDMIR">
-        <img src="https://github-readme-stats.vercel.app/api/pin/?username=Easesgr&repo=CDMIR&theme=transparent&hide_border=true" />
-      </a>
+      <p align="center">
+        <a href="https://github.com/Easesgr/CDMIR"><b>查看项目 →</b></a>
+      </p>
     </td>
   </tr>
+
   <tr>
-    <td width="50%">
+    <td width="50%" align="center" valign="top">
       <h3>📘 AnyiAI Docs</h3>
-      <p>
+      <p align="center">
         一个面向 AI 学习、面试准备和项目实践的开源知识库，
         内容覆盖机器学习、深度学习、Transformer、大模型、多模态等方向。
       </p>
-      <a href="https://github.com/Easesgr/anyiai-docs">
-        <img src="https://github-readme-stats.vercel.app/api/pin/?username=Easesgr&repo=anyiai-docs&theme=transparent&hide_border=true" />
-      </a>
+      <p align="center">
+        <a href="https://github.com/Easesgr/anyiai-docs"><b>查看项目 →</b></a>
+      </p>
     </td>
-    <td width="50%">
+
+    <td width="50%" align="center" valign="top">
       <h3>☕ StudyAlgorithm</h3>
-      <p>
+      <p align="center">
         算法学习与编程练习仓库，用于沉淀数据结构、算法题解和基础编程能力。
       </p>
-      <a href="https://github.com/Easesgr/StudyAlgorithm">
-        <img src="https://github-readme-stats.vercel.app/api/pin/?username=Easesgr&repo=StudyAlgorithm&theme=transparent&hide_border=true" />
-      </a>
+      <p align="center">
+        <a href="https://github.com/Easesgr/StudyAlgorithm"><b>查看项目 →</b></a>
+      </p>
     </td>
   </tr>
 </table>
