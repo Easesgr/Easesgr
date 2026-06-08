@@ -169,14 +169,36 @@
 
 <div align="center">
 
-<img height="165" src="https://github-readme-stats.vercel.app/api?username=Easesgr&show_icons=true&theme=transparent&hide_border=true&rank_icon=github" />
-<img height="165" src="https://github-readme-streak-stats.herokuapp.com?user=Easesgr&theme=transparent&hide_border=true" />
+  <h2>📊 当前状态</h2>
 
-</div>
-
-<div align="center">
-
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=Easesgr&layout=compact&theme=transparent&hide_border=true" />
+  <table align="center">
+    <tr>
+      <td align="center" width="25%">
+        <h3>🧠</h3>
+        <b>科研方向</b>
+        <br />
+        <sub>图像复原 / 多退化建模</sub>
+      </td>
+      <td align="center" width="25%">
+        <h3>🤖</h3>
+        <b>Agent 开发</b>
+        <br />
+        <sub>CrewAI / RAG / 内容生成</sub>
+      </td>
+      <td align="center" width="25%">
+        <h3>📘</h3>
+        <b>知识库建设</b>
+        <br />
+        <sub>AI 学习路线 / 面试题</sub>
+      </td>
+      <td align="center" width="25%">
+        <h3>🚀</h3>
+        <b>开源计划</b>
+        <br />
+        <sub>正在整理，即将开源</sub>
+      </td>
+    </tr>
+  </table>
 
 </div>
 
