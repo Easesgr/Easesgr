@@ -1,10 +1,10 @@
 <div align="center">
 
-# Hi, I'm Easesgr 👋
+# Hi, I'm Anyi 👋
 
 ### AI Researcher · Computer Vision · Image Restoration · Open Source
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:2563EB,50:06B6D4,100:7C3AED&height=180&section=header&text=Easesgr&fontSize=56&fontColor=ffffff&animation=fadeIn&fontAlignY=36" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:2563EB,50:06B6D4,100:7C3AED&height=180&section=header&text=Anyi&fontSize=56&fontColor=ffffff&animation=fadeIn&fontAlignY=36" />
 
 <p>
   <a href="https://github.com/Easesgr">
