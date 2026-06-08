@@ -1,4 +1,4 @@
-```md
+
 <div align="center">
 
 # 你好，我是 Anyi 👋
@@ -188,4 +188,4 @@
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:7C3AED,50:06B6D4,100:2563EB&height=120&section=footer" />
 
 </div>
-```
+
