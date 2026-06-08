@@ -116,7 +116,6 @@
         <a href="https://github.com/Easesgr/MSLKAD"><b>查看项目 →</b></a>
       </p>
     </td>
-
     <td width="50%" align="center" valign="top">
       <h3>🧠 CDMIR</h3>
       <p align="center">
@@ -140,7 +139,6 @@
         <a href="https://github.com/Easesgr/anyiai-docs"><b>查看项目 →</b></a>
       </p>
     </td>
-
     <td width="50%" align="center" valign="top">
       <h3>☕ StudyAlgorithm</h3>
       <p align="center">
@@ -168,9 +166,7 @@
 ## 📊 GitHub 数据
 
 <div align="center">
-
   <h2>📊 当前状态</h2>
-
   <table align="center">
     <tr>
       <td align="center" width="25%">
@@ -199,7 +195,6 @@
       </td>
     </tr>
   </table>
-
 </div>
 
 ---
@@ -208,7 +203,6 @@
 
 - 搭建 **AnyiAI Docs**：系统整理 AI 学习路线和面试知识库。
 - 持续推进 **All-in-One 图像复原** 相关研究。
-- 整理图像复原模型代码、训练配置、实验结果和复现文档。
 - 输出大模型、计算机视觉、AI 工程化相关教程。
 - 构建个人 AI 内容工作流和开源项目体系。
 
