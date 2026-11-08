@@ -1,15 +1,16 @@
 # Asset sources
 
-- `anyi-wordmark.png`: original handwritten Anyi logo from [anyiai-docs](https://github.com/Easesgr/anyiai-docs/blob/bcd2201988682aed1459ee1c7e91d356b6e60c97/src/.vuepress/public/logo.svg), keeping the letterforms, bird and heart.
-- `flow.svg`, `flow-mobile.svg` and their static SVG alternatives: original deterministic color-flow animation on a fully transparent canvas, designed for GitHub’s default white page and rendered by `scripts/render_assets.py`. They are decorative personal-profile graphics; no experimental data or project screenshots.
-- `tech-stack-*.svg`: six technology icons from [Skill Icons](https://github.com/tandpfun/skill-icons), with its included license. The two versions adapt to GitHub light/dark themes.
+- `anyi-wordmark.png`: regenerated **Anyi-only** version of the [original handwritten brand](https://github.com/Easesgr/anyiai-docs/blob/bcd2201988682aed1459ee1c7e91d356b6e60c97/src/.vuepress/public/logo.svg). The separate final “Ai” is removed. The original first four letters and bird remain, with the existing gold heart placed above the i. Transparent canvas and source metadata are preserved.
+- `signature.svg`, `signature-mobile.svg` and their static variants: original color-flow animation surrounding the new Anyi wordmark. All images are embedded and the artwork adapts to the host light/dark theme.
+- `action-*.svg`: original vector link buttons and slow moving edge accents; the artwork names the link action.
+- `technologies*.svg`: logos from [Skill Icons](https://github.com/tandpfun/skill-icons), with its included MIT license, rearranged on transparent backgrounds with labels and animated underlines. `tech-stack-light.svg` is retained as the upstream source for regeneration.
 - `fonts/`: Manrope, under the included SIL Open Font License.
 
-Regenerate the banner with:
+Regenerate the profile graphics:
 
 ```sh
 python3 -m pip install -r requirements-assets.txt
 python3 scripts/render_assets.py
 ```
 
-The README selects the static header when reduced motion is requested, and a separate composition below 600 CSS pixels. Embedded SVG source metadata documents the rendering recipe. The SVG inherits the host page’s color scheme internally, so the default white page uses the original dark green letterforms without relying on combined GitHub picture conditions.
+SVG artwork includes source metadata and has no scripts or remote dependencies. The README selects static alternatives for every animated image under reduced motion, plus narrower header/technology layouts below 600 CSS pixels. Project links remain native HTML links.
