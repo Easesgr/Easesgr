@@ -1,10 +1,10 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="assets/orbit-mobile-static.png">
-  <source media="(prefers-reduced-motion: reduce)" srcset="assets/orbit-static.png">
-  <source media="(max-width: 600px)" srcset="assets/orbit-mobile.gif">
-  <img src="assets/orbit.gif" alt="Anyi：手写字标、环绕光轨与流动星点组成的动态个人名片。" width="100%">
+  <source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="assets/flow-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="assets/flow-static.svg">
+  <source media="(max-width: 600px)" srcset="assets/flow-mobile.svg">
+  <img src="assets/flow.svg" alt="Anyi：透明底手写字标与彩色流线组成的动态个人名片。" width="100%">
 </picture>
 
 ### Hi, I'm Anyi

@@ -1,133 +1,121 @@
-"""Render the profile's animated identity using geometry and the original logo.
+"""Render transparent, theme-aware SVG artwork for the GitHub profile.
 
-Requires requirements-assets.txt. No model calls or project-image downloads.
+Native SVG/CSS animation and the original handwritten logo. No scripts,
+external assets, network requests or model calls are used by the artwork.
 """
 
 from __future__ import annotations
 
+import base64
+import io
 import math
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter, ImageFont, PngImagePlugin
+from PIL import Image, ImageDraw, ImageFont, PngImagePlugin
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / 'assets'
-MINT = (173, 249, 212)
-CYAN = (79, 204, 210)
-VIOLET = (148, 127, 228)
-ORIGIN = ('Origin: original deterministic orbital light trails, star field and scan-light '
-          'animation around the existing Anyi handwritten wordmark. Revised at the user request '
-          'for a visually striking personal profile with minimal project detail. No project '
-          'screenshots, fabricated data or model-generated imagery.')
+THEMES = {
+    'light': {'ink': (20, 92, 65), 'caption': (73, 100, 94), 'line_alpha': 100},
+    'dark': {'ink': (155, 232, 195), 'caption': (181, 207, 202), 'line_alpha': 150},
+}
+COLORS = [(53, 118, 235), (22, 166, 146), (154, 111, 221), (226, 155, 60)]
+ORIGIN = ('Origin: original transparent vector color-flow animation surrounding the preserved '
+          'Anyi handwritten wordmark. Designed for GitHub default white pages. The embedded '
+          'artwork inherits the host color scheme and provides narrow-screen and static '
+          'alternatives. No screenshots, project demos, scripts or external services.')
 
 
-def wordmark() -> Image.Image:
+def wordmark(ink: tuple[int, int, int]) -> Image.Image:
     image = Image.open(ASSETS / 'anyi-wordmark.png').convert('RGBA')
     pixels = np.asarray(image).copy()
     gold = (pixels[:, :, 0] > pixels[:, :, 1]) & (pixels[:, :, 3] > 0)
-    pixels[:, :, :3] = MINT
-    pixels[gold, :3] = (244, 207, 118)
-    image = Image.fromarray(pixels)
-    return image.crop(image.getbbox())
+    pixels[:, :, :3] = ink
+    pixels[gold, :3] = (214, 160, 48)
+    return Image.fromarray(pixels).crop(image.getbbox())
 
 
-def orbit(width: int, height: int, tilt: float, spread: float):
-    angles = np.linspace(0, math.tau, 240)
-    x = width * spread * np.cos(angles)
-    y = height * .17 * np.sin(angles)
-    cosine, sine = math.cos(tilt), math.sin(tilt)
-    return [(width / 2 + a * cosine - b * sine, height * .44 + a * sine + b * cosine)
-            for a, b in zip(x, y)]
+def flowing_points(width: int, height: int, strand: int, upper: bool):
+    points = []
+    for x in np.linspace(-width * .03, width * 1.03, 140):
+        progress = x / width
+        offset = strand * height * .016
+        y = (height * (-.09 + .14 * math.sin(progress * math.pi + .3) ** 2) + offset if upper
+             else height * (1.08 - .15 * math.sin(progress * math.pi + .5) ** 2) - offset)
+        points.append((x, y))
+    return points
 
 
-def background(width: int, height: int):
-    yy, xx = np.mgrid[:height, :width]
-    glow = np.exp(-(((xx - width * .49) / (width * .36)) ** 2 +
-                    ((yy - height * .47) / (height * .55)) ** 2) * 1.8)
-    pixels = np.empty((height, width, 3), dtype=np.uint8)
-    for channel, (base, light) in enumerate([(5, 8), (12, 20), (15, 16)]):
-        pixels[:, :, channel] = base + glow * light
-    return Image.fromarray(pixels)
+def centerpiece(theme: str, mobile: bool, width: int, height: int):
+    settings = THEMES[theme]
+    mark = wordmark(settings['ink'])
+    mark.thumbnail((455, 158) if mobile else (560, 186), Image.Resampling.LANCZOS)
+    image = Image.new('RGBA', (width, height))
+    image.alpha_composite(mark, ((width - mark.width) // 2, round(height * .45 - mark.height / 2)))
+    subtitle = 'Vision  /  Agents  /  Open Source' if mobile else 'Computer Vision  /  AI Agents  /  Open Source'
+    font = ImageFont.truetype(str(ASSETS / 'fonts/manrope-400.ttf'), 23 if mobile else 24)
+    pen = ImageDraw.Draw(image)
+    box = pen.textbbox((0, 0), subtitle, font=font)
+    pen.text(((width - box[2]) / 2, height * .73), subtitle, font=font, fill=(*settings['caption'], 255))
+    buffer = io.BytesIO()
+    image.save(buffer, format='PNG', optimize=True)
+    return image, base64.b64encode(buffer.getvalue()).decode()
 
 
-def hero(mobile: bool):
-    width, height = (720, 540) if mobile else (1280, 420)
-    base = background(width, height)
-    mark = wordmark()
-    mark.thumbnail((460, 160) if mobile else (570, 180), Image.Resampling.LANCZOS)
-    mark_position = ((width - mark.width) // 2, round(height * .43 - mark.height / 2))
-    mask = Image.new('L', (width, height))
-    mask.paste(mark.getchannel('A'), mark_position)
-    soft_logo = Image.new('RGB', (width, height), MINT)
-    logo_halo = mask.filter(ImageFilter.GaussianBlur(16)).point(lambda value: value // 4)
-    base.paste(soft_logo, (0, 0), logo_halo)
-
-    rng = np.random.default_rng(2411 if mobile else 1706)
-    stars = [(rng.uniform(.035, .965) * width, rng.uniform(.07, .9) * height,
-              rng.uniform(.7, 1.6), rng.uniform(0, math.tau)) for _ in range(58)]
-    paths = [orbit(width, height, tilt, .38 if mobile else .355)
-             for tilt in ((-.28, .32) if mobile else (-.16, .16))]
-    regular = ImageFont.truetype(str(ASSETS / 'fonts/manrope-400.ttf'), 24 if mobile else 25)
-    role = 'Vision  /  Agents  /  Open Source' if mobile else 'Computer Vision  /  AI Agents  /  Open Source'
-    label = Image.new('RGBA', (width, height))
-    draw = ImageDraw.Draw(label)
-    box = draw.textbbox((0, 0), role, font=regular)
-    draw.text(((width - box[2]) / 2, height * .80), role, font=regular, fill=(178, 205, 201, 255))
-
-    frames = []
-    for index in range(84):
-        phase = index / 84
-        image = base.copy()
-        ink = ImageDraw.Draw(image)
-        for x, y, radius, offset in stars:
-            brightness = .45 + .25 * math.sin(phase * math.tau + offset)
-            color = tuple(round(value * brightness) for value in MINT)
-            ink.ellipse((x - radius, y - radius, x + radius, y + radius), fill=color)
-        luminous = Image.new('RGBA', (width, height))
-        pen = ImageDraw.Draw(luminous)
-        for route, (points, tint) in enumerate(zip(paths, (CYAN, VIOLET))):
-            ink.line(points, fill=tuple(value // 6 for value in tint), width=1)
-            for strand in range(2):
-                head = int(((phase * (1 if route == 0 else -1) + strand * .5 + route * .2) % 1) * len(points))
-                for tail in range(54, -1, -1):
-                    point = points[(head - tail) % len(points)]
-                    opacity = int(220 * (1 - tail / 55) ** 2)
-                    pen.ellipse((point[0] - 1.4, point[1] - 1.4, point[0] + 1.4, point[1] + 1.4),
-                                fill=(*tint, opacity))
-                x, y = points[head]
-                pen.ellipse((x - 2, y - 2, x + 2, y + 2), fill=(*MINT, 255))
-        image = Image.alpha_composite(image.convert('RGBA'), luminous.filter(ImageFilter.GaussianBlur(5)))
-        image = Image.alpha_composite(image, luminous)
-        image.paste(mark, mark_position, mark)
-
-        # One soft highlight crosses the existing letter strokes per loop.
-        sweep_x = width * ((phase + .18) % 1)
-        xx = np.arange(width)
-        strip = (np.exp(-((xx - sweep_x) / (width * .04)) ** 2) * 90).astype(np.uint8)
-        sweep = np.tile(strip, (height, 1))
-        alpha = Image.fromarray((sweep.astype(np.uint16) * np.asarray(mask) // 255).astype(np.uint8))
-        highlight = Image.new('RGBA', (width, height), (237, 255, 247, 0))
-        highlight.putalpha(alpha)
-        image = Image.alpha_composite(image, highlight)
-        image = Image.alpha_composite(image, label)
-        frames.append(image.convert('RGB'))
-
-    name = 'orbit-mobile' if mobile else 'orbit'
-    metadata = PngImagePlugin.PngInfo()
-    metadata.add_text('impeccable:prompt', ORIGIN)
-    frames[22].save(ASSETS / (name + '-static.png'), pnginfo=metadata, optimize=True)
-    palette_source = Image.new('RGB', (width, height * 3))
-    for row, sample in enumerate((0, 22, 50)):
-        palette_source.paste(frames[sample], (0, row * height))
-    palette = palette_source.quantize(colors=192, method=Image.Quantize.MEDIANCUT)
-    indexed = [frame.quantize(palette=palette, dither=Image.Dither.NONE) for frame in frames]
-    indexed[0].save(ASSETS / (name + '.gif'), save_all=True, append_images=indexed[1:],
-                    duration=80, loop=0, optimize=True, disposal=1, comment=ORIGIN.encode())
+def render(mobile: bool):
+    width, height = (720, 390) if mobile else (1280, 360)
+    name = 'flow-mobile' if mobile else 'flow'
+    raster_images = {theme: centerpiece(theme, mobile, width, height) for theme in THEMES}
+    previews = {theme: Image.new('RGBA', (width * 2, height * 2)) for theme in THEMES}
+    layers = []
+    for upper in (True, False):
+        paths = []
+        for strand in range(7):
+            color = COLORS[(strand // 2 + (0 if upper else 1)) % len(COLORS)]
+            points = flowing_points(width, height, strand, upper)
+            path = 'M' + ' L'.join(f'{x:.1f},{y:.1f}' for x, y in points)
+            ink = '#%02x%02x%02x' % color
+            paths.append(f'<path class="track" d="{path}" stroke="{ink}"/>')
+            for theme, preview in previews.items():
+                ImageDraw.Draw(preview).line([(x * 2, y * 2) for x, y in points],
+                    fill=(*color, THEMES[theme]['line_alpha']), width=4)
+            if strand in (1, 5):
+                delay = -(strand * .31 + (0 if upper else 1.3))
+                direction = 'normal' if upper else 'reverse'
+                paths.append(f'<path class="pulse" d="{path}" pathLength="100" stroke="{ink}" '
+                    f'stroke-width="3.2" stroke-dasharray="12 88" opacity=".95" '
+                    f'style="animation-delay:{delay}s;animation-direction:{direction}"/>')
+        offset = 0 if upper else -2.88
+        layers.append(f'<g class="ribbon" style="animation-delay:{offset}s">' + ''.join(paths) + '</g>')
+    styles = ('.track{opacity:.392}.dark-ink{display:none}'
+              '@media(prefers-color-scheme:dark){.track{opacity:.588}.light-ink{display:none}.dark-ink{display:inline}}')
+    motion = ('.pulse{animation:travel 5.76s linear infinite}.ribbon{animation:sway 5.76s ease-in-out infinite}'
+              '@keyframes travel{to{stroke-dashoffset:-100}}'
+              '@keyframes sway{0%,100%{transform:translateY(-4px)}50%{transform:translateY(4px)}}'
+              '@media(prefers-reduced-motion:reduce){.pulse,.ribbon{animation:none}}')
+    images = ''.join(f'<image class="{theme}-ink" width="{width}" height="{height}" '
+                     f'xlink:href="data:image/png;base64,{raster}"/>' for theme, (_, raster) in raster_images.items())
+    for animated in (True, False):
+        filename = name + ('' if animated else '-static') + '.svg'
+        svg = (f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" '
+               f'width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">'
+               '<title id="title">Anyi — Vision, Agents, Open Source</title>'
+               '<desc id="desc">Original handwritten signature and flowing colored lines on a transparent canvas.</desc>'
+               f'<metadata>{ORIGIN}</metadata><style>{styles}{motion if animated else ""}</style>'
+               '<g fill="none" stroke-width="2" stroke-linecap="round">' + ''.join(layers) + '</g>' + images + '</svg>')
+        (ASSETS / filename).write_text(svg + '\n')
+        print(f'{filename}: {(ASSETS / filename).stat().st_size:,} bytes')
+    # Local proofs make the actual canvas alpha independently inspectable.
+    proof_root = ROOT / 'output' / 'flow-proofs'
+    proof_root.mkdir(parents=True, exist_ok=True)
+    for theme, preview in previews.items():
+        proof = Image.alpha_composite(preview.resize((width, height), Image.Resampling.LANCZOS), raster_images[theme][0])
+        metadata = PngImagePlugin.PngInfo()
+        metadata.add_text('impeccable:prompt', ORIGIN)
+        proof.save(proof_root / f'{name}-{theme}.png', pnginfo=metadata)
 
 
 if __name__ == '__main__':
-    hero(False)
-    hero(True)
-    for name in ('orbit.gif', 'orbit-mobile.gif', 'orbit-static.png', 'orbit-mobile-static.png'):
-        print(f'{name}: {(ASSETS / name).stat().st_size:,} bytes')
+    render(False)
+    render(True)
