@@ -23,19 +23,16 @@
   <img src="assets/technologies.svg" alt="常用技术：Python、PyTorch、OpenCV、TypeScript、Vue、Linux。" width="480">
 </picture>
 
-<table align="center" width="100%">
-  <tr>
-    <td align="center" width="50%">
-      <b>Research</b><br>
-      <a href="https://github.com/Easesgr/MSLKAD">MSLKAD</a><br>
-      <a href="https://github.com/Easesgr/CDMIR">CDMIR</a>
-    </td>
-    <td align="center" width="50%">
-      <b>Building</b><br>
-      <a href="https://github.com/Easesgr/dialogue-converter" title="Dialogue Converter">Converter</a><br>
-      <a href="https://github.com/Easesgr/anyiai-docs" title="AnyiAI Docs">Docs</a>
-    </td>
-  </tr>
-</table>
+<p>
+  <b>Research</b><br>
+  <a href="https://github.com/Easesgr/MSLKAD" aria-label="查看 MSLKAD 项目"><picture><source media="(max-width: 600px)" srcset="assets/project-mslkad-mobile.svg"><img src="assets/project-mslkad.svg" alt="MSLKAD"></picture></a>
+  <a href="https://github.com/Easesgr/CDMIR" aria-label="查看 CDMIR 项目"><picture><source media="(max-width: 600px)" srcset="assets/project-cdmir-mobile.svg"><img src="assets/project-cdmir.svg" alt="CDMIR"></picture></a>
+</p>
+
+<p>
+  <b>Building</b><br>
+  <a href="https://github.com/Easesgr/dialogue-converter" aria-label="查看 Dialogue Converter 项目"><picture><source media="(max-width: 600px)" srcset="assets/project-converter-mobile.svg"><img src="assets/project-converter.svg" alt="Dialogue Converter"></picture></a>
+  <a href="https://github.com/Easesgr/anyiai-docs" aria-label="查看 AnyiAI Docs 项目"><picture><source media="(max-width: 600px)" srcset="assets/project-docs-mobile.svg"><img src="assets/project-docs.svg" alt="AnyiAI Docs"></picture></a>
+</p>
 
 </div>

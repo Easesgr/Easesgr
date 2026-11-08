@@ -222,9 +222,53 @@ def technology_band(mobile: bool):
         (ASSETS / filename).write_bytes(ET.tostring(root, encoding='utf-8', xml_declaration=True))
 
 
+def project_links(mobile: bool):
+    """Borderless repository links, with a narrower composition for phones."""
+    width, height = (136, 52) if mobile else (228, 52)
+    label_x, label_size = (30, 14) if mobile else (42, 17)
+    icon_x, icon_size = (8, 16) if mobile else (12, 20)
+    projects = [
+        ('mslkad', 'MSLKAD', 'MSLKAD', '#3576eb',
+         '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 9h10M7 13h7M7 17h4"/>'),
+        ('cdmir', 'CDMIR', 'CDMIR', '#9a6fdd',
+         '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m3 17 5-5 4 4 4-6 5 7M15 6v2"/>'),
+        ('converter', 'Converter', 'Dialogue Converter', '#16a692',
+         '<path d="M4 8h16m-4-4 4 4-4 4M20 16H4m4-4-4 4 4 4"/>'),
+        ('docs', 'Docs', 'AnyiAI Docs', '#e29b3c',
+         '<path d="M3 4.5c3-1 6-.5 9 1 3-1.5 6-2 9-1v15c-3-1-6-.5-9 1-3-1.5-6-2-9-1zM12 5.5v15"/>'),
+    ]
+    for slug, label, title, accent, icon in projects:
+        labels = label_layers(width, height, [(label, label_x, 24, 'lm')], label_size,
+                              '#245c45', '#b8e5cc', bold=True)
+        text_images = ''.join(
+            f'<image class="text-{theme}" width="{width}" height="{height}" '
+            f'href="data:image/png;base64,{raster}"/>' for theme, raster in labels)
+        svg = (
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
+            f'viewBox="0 0 {width} {height}" role="img">'
+            f'<title>{title}</title>'
+            '<metadata>Original borderless project link graphic for Anyi. Embedded Manrope lettering, '
+            'vector icon and directional arrow on a transparent canvas. Static and theme-aware.</metadata>'
+            '<style>.symbol{stroke:#245c45}.rule{stroke:#dbe8df}.text-dark{display:none}'
+            '@media(prefers-color-scheme:dark){.symbol{stroke:#b8e5cc}.rule{stroke:#334b3b}'
+            '.text-light{display:none}.text-dark{display:inline}}</style>'
+            f'<g class="symbol" transform="translate({icon_x} {24 - icon_size / 2}) scale({icon_size / 24})" '
+            f'fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">{icon}</g>'
+            + text_images +
+            f'<path class="symbol" d="M{width - 22} 29l8-8m-8 0h8v8" '
+            'fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
+            f'<path class="rule" d="M8 47H{width - 8}" fill="none" stroke-width="1"/>'
+            f'<path d="M8 47H36" stroke="{accent}" fill="none" stroke-width="2" stroke-linecap="round"/>'
+            '</svg>')
+        filename = f'project-{slug}' + ('-mobile' if mobile else '') + '.svg'
+        (ASSETS / filename).write_text(svg + '\n')
+
+
 if __name__ == '__main__':
     render(False)
     render(True)
     action_buttons()
     technology_band(False)
     technology_band(True)
+    project_links(False)
+    project_links(True)

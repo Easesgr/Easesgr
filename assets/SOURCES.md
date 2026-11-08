@@ -4,6 +4,7 @@
 - `signature.svg`, `signature-mobile.svg` and their static variants: original color-flow animation surrounding the new Anyi wordmark. All images are embedded and the artwork adapts to the host light/dark theme.
 - `action-*.svg`: original vector link buttons and slow moving edge accents; the artwork names the link action.
 - `technologies*.svg`: logos from [Skill Icons](https://github.com/tandpfun/skill-icons), with its included MIT license, rearranged on transparent backgrounds with labels and animated underlines. `tech-stack-light.svg` is retained as the upstream source for regeneration.
+- `project-*.svg`: original transparent repository-link graphics with embedded Manrope labels, vector icons, directional arrows and colored rules. Desktop and mobile compositions preserve the four individual repository links. These graphics are static.
 - `fonts/`: Manrope, under the included SIL Open Font License.
 
 Regenerate the profile graphics:
