@@ -1,220 +1,133 @@
-"""Render the GitHub profile's original graphics and public project previews.
+"""Render the profile's animated identity using geometry and the original logo.
 
-Requires Pillow and numpy. Run from any directory with Python 3.10+.
-The GIFs are deterministic graphics, not model-generated images.
+Requires requirements-assets.txt. No model calls or project-image downloads.
 """
 
 from __future__ import annotations
 
 import math
-import json
 from pathlib import Path
-from urllib.request import urlopen
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont, PngImagePlugin
+from PIL import Image, ImageDraw, ImageFilter, ImageFont, PngImagePlugin
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / 'assets'
-SOURCES = ROOT / 'output' / 'research'
-BACKGROUND = '#071811'
-PANEL = '#10291e'
-RULE = '#2c503c'
-MINT = '#b6f5cf'
-GREEN = '#57dc98'
-AMBER = '#e9c36d'
-MUTED = '#a4c7b3'
-REGULAR = ASSETS / 'fonts/manrope-400.ttf'
-BOLD = ASSETS / 'fonts/manrope-700.ttf'
-ORIGIN = ('Origin: deterministic Pillow rendering of the user-confirmed dark research bench, '
-          'using the existing Anyi handwritten wordmark from Easesgr/anyiai-docs. '
-          'Three labeled paths represent public research, tools and learning resources. '
-          'No measured data, model-generated imagery or third-party stats services.')
-
-
-def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
-    return ImageFont.truetype(str(BOLD if bold else REGULAR), size)
-
-
-def text(draw: ImageDraw.ImageDraw, xy, value: str, size: int, color=MINT, bold=False):
-    draw.text(xy, value, font=font(size, bold), fill=color)
-
-
-def source(name: str, url: str) -> Image.Image:
-    path = SOURCES / name
-    if not path.exists():
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with urlopen(url, timeout=30) as response:
-            path.write_bytes(response.read())
-    return Image.open(path).convert('RGB')
-
-
-def png(image: Image.Image, name: str, origin: str = ORIGIN):
-    info = PngImagePlugin.PngInfo()
-    info.add_text('impeccable:prompt', origin)
-    image.save(ASSETS / name, pnginfo=info, optimize=True)
-
-
-def exif(origin: str) -> Image.Exif:
-    metadata = Image.Exif()
-    metadata[0x010E] = origin
-    return metadata
-
-
-def provenance(name: str, origin: str):
-    (ASSETS / (name + '.json')).write_text(json.dumps({'prompt': origin}, indent=2) + '\n')
+MINT = (173, 249, 212)
+CYAN = (79, 204, 210)
+VIOLET = (148, 127, 228)
+ORIGIN = ('Origin: original deterministic orbital light trails, star field and scan-light '
+          'animation around the existing Anyi handwritten wordmark. Revised at the user request '
+          'for a visually striking personal profile with minimal project detail. No project '
+          'screenshots, fabricated data or model-generated imagery.')
 
 
 def wordmark() -> Image.Image:
     image = Image.open(ASSETS / 'anyi-wordmark.png').convert('RGBA')
     pixels = np.asarray(image).copy()
-    amber = (pixels[:, :, 0] > pixels[:, :, 1]) & (pixels[:, :, 3] > 0)
-    pixels[:, :, :3] = (182, 245, 207)
-    pixels[amber, :3] = (233, 195, 109)
+    gold = (pixels[:, :, 0] > pixels[:, :, 1]) & (pixels[:, :, 3] > 0)
+    pixels[:, :, :3] = MINT
+    pixels[gold, :3] = (244, 207, 118)
     image = Image.fromarray(pixels)
     return image.crop(image.getbbox())
 
 
-def polyline_sample(points, fraction: float):
-    lengths = [math.dist(a, b) for a, b in zip(points, points[1:])]
-    distance = fraction * sum(lengths)
-    for a, b, length in zip(points, points[1:], lengths):
-        if distance <= length:
-            ratio = distance / length
-            return a[0] + (b[0] - a[0]) * ratio, a[1] + (b[1] - a[1]) * ratio
-        distance -= length
-    return points[-1]
+def orbit(width: int, height: int, tilt: float, spread: float):
+    angles = np.linspace(0, math.tau, 240)
+    x = width * spread * np.cos(angles)
+    y = height * .17 * np.sin(angles)
+    cosine, sine = math.cos(tilt), math.sin(tilt)
+    return [(width / 2 + a * cosine - b * sine, height * .44 + a * sine + b * cosine)
+            for a, b in zip(x, y)]
 
 
-def node(draw, center, radius=6, color=GREEN):
-    x, y = center
-    draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=color)
-
-
-def hero_base(mobile: bool):
-    width, height = (720, 660) if mobile else (1280, 440)
-    image = Image.new('RGB', (width, height), BACKGROUND)
-    draw = ImageDraw.Draw(image)
-    mark = wordmark()
-    mark.thumbnail((480, 170) if not mobile else (460, 166), Image.Resampling.LANCZOS)
-    image.paste(mark, (54, 54) if not mobile else (46, 44), mark)
-
-    if mobile:
-        text(draw, (48, 218), 'Research. Tools.', 42, bold=True)
-        text(draw, (48, 270), 'Open knowledge.', 42, bold=True)
-        endpoints = [(200, 448), (380, 448), (560, 448)]
-        paths = [[(76, 370), (128, 370), (200, 408), (200, 448)],
-                 [(76, 370), (258, 370), (380, 408), (380, 448)],
-                 [(76, 370), (438, 370), (560, 408), (560, 448)]]
-        labels = [('Vision', 144), ('Tools', 335), ('Learn', 513)]
-        for label, x in labels:
-            text(draw, (x, 480), label, 34, bold=True)
-        draw.line((48, 565, 672, 565), fill=RULE, width=1)
-        text(draw, (48, 600), 'Easesgr / Anyi', 28, MUTED)
-        text(draw, (483, 600), 'Yunnan Univ.', 25, MUTED)
-    else:
-        text(draw, (58, 238), 'Image restoration.', 32, bold=True)
-        text(draw, (58, 282), 'AI tools. Open knowledge.', 32, bold=True)
-        endpoints = [(800, 102), (1052, 206), (850, 314)]
-        paths = [[(620, 206), (690, 206), (740, 156), (740, 102), endpoints[0]],
-                 [(620, 206), endpoints[1]],
-                 [(620, 206), (690, 206), (740, 258), (740, 314), endpoints[2]]]
-        text(draw, (826, 82), 'VISION', 27, bold=True)
-        text(draw, (1078, 186), 'TOOLS', 27, bold=True)
-        text(draw, (876, 294), 'LEARN', 27, bold=True)
-        draw.line((58, 368, 1222, 368), fill=RULE, width=1)
-        text(draw, (58, 390), 'Easesgr / Anyi', 23, MUTED)
-        text(draw, (1011, 390), 'Yunnan University', 23, MUTED)
-
-    for index, path in enumerate(paths):
-        draw.line(path, fill=RULE, width=3, joint='curve')
-        node(draw, endpoints[index], 7, AMBER if index == 2 else GREEN)
-    node(draw, paths[0][0], 7, MINT)
-    return image, paths
+def background(width: int, height: int):
+    yy, xx = np.mgrid[:height, :width]
+    glow = np.exp(-(((xx - width * .49) / (width * .36)) ** 2 +
+                    ((yy - height * .47) / (height * .55)) ** 2) * 1.8)
+    pixels = np.empty((height, width, 3), dtype=np.uint8)
+    for channel, (base, light) in enumerate([(5, 8), (12, 20), (15, 16)]):
+        pixels[:, :, channel] = base + glow * light
+    return Image.fromarray(pixels)
 
 
 def hero(mobile: bool):
-    base, paths = hero_base(mobile)
+    width, height = (720, 540) if mobile else (1280, 420)
+    base = background(width, height)
+    mark = wordmark()
+    mark.thumbnail((460, 160) if mobile else (570, 180), Image.Resampling.LANCZOS)
+    mark_position = ((width - mark.width) // 2, round(height * .43 - mark.height / 2))
+    mask = Image.new('L', (width, height))
+    mask.paste(mark.getchannel('A'), mark_position)
+    soft_logo = Image.new('RGB', (width, height), MINT)
+    logo_halo = mask.filter(ImageFilter.GaussianBlur(16)).point(lambda value: value // 4)
+    base.paste(soft_logo, (0, 0), logo_halo)
+
+    rng = np.random.default_rng(2411 if mobile else 1706)
+    stars = [(rng.uniform(.035, .965) * width, rng.uniform(.07, .9) * height,
+              rng.uniform(.7, 1.6), rng.uniform(0, math.tau)) for _ in range(58)]
+    paths = [orbit(width, height, tilt, .38 if mobile else .355)
+             for tilt in ((-.28, .32) if mobile else (-.16, .16))]
+    regular = ImageFont.truetype(str(ASSETS / 'fonts/manrope-400.ttf'), 24 if mobile else 25)
+    role = 'Vision  /  Agents  /  Open Source' if mobile else 'Computer Vision  /  AI Agents  /  Open Source'
+    label = Image.new('RGBA', (width, height))
+    draw = ImageDraw.Draw(label)
+    box = draw.textbbox((0, 0), role, font=regular)
+    draw.text(((width - box[2]) / 2, height * .80), role, font=regular, fill=(178, 205, 201, 255))
+
     frames = []
-    for frame in range(72):
+    for index in range(84):
+        phase = index / 84
         image = base.copy()
-        draw = ImageDraw.Draw(image)
-        for index, points in enumerate(paths):
-            phase = ((frame / 72) + index / 3) % 1
-            color = AMBER if index == 2 else MINT
-            for step in range(12, -1, -1):
-                position = max(0, phase - step * .013)
-                x, y = polyline_sample(points, position)
-                node(draw, (x, y), 2 if step else 5, GREEN if step else color)
-        frames.append(image)
-    name = 'hero-mobile' if mobile else 'hero'
-    png(frames[38], name + '-static.png')
-    # A shared palette keeps thin traces and lettering stable between frames.
-    palette = base.quantize(colors=96, method=Image.Quantize.MEDIANCUT)
+        ink = ImageDraw.Draw(image)
+        for x, y, radius, offset in stars:
+            brightness = .45 + .25 * math.sin(phase * math.tau + offset)
+            color = tuple(round(value * brightness) for value in MINT)
+            ink.ellipse((x - radius, y - radius, x + radius, y + radius), fill=color)
+        luminous = Image.new('RGBA', (width, height))
+        pen = ImageDraw.Draw(luminous)
+        for route, (points, tint) in enumerate(zip(paths, (CYAN, VIOLET))):
+            ink.line(points, fill=tuple(value // 6 for value in tint), width=1)
+            for strand in range(2):
+                head = int(((phase * (1 if route == 0 else -1) + strand * .5 + route * .2) % 1) * len(points))
+                for tail in range(54, -1, -1):
+                    point = points[(head - tail) % len(points)]
+                    opacity = int(220 * (1 - tail / 55) ** 2)
+                    pen.ellipse((point[0] - 1.4, point[1] - 1.4, point[0] + 1.4, point[1] + 1.4),
+                                fill=(*tint, opacity))
+                x, y = points[head]
+                pen.ellipse((x - 2, y - 2, x + 2, y + 2), fill=(*MINT, 255))
+        image = Image.alpha_composite(image.convert('RGBA'), luminous.filter(ImageFilter.GaussianBlur(5)))
+        image = Image.alpha_composite(image, luminous)
+        image.paste(mark, mark_position, mark)
+
+        # One soft highlight crosses the existing letter strokes per loop.
+        sweep_x = width * ((phase + .18) % 1)
+        xx = np.arange(width)
+        strip = (np.exp(-((xx - sweep_x) / (width * .04)) ** 2) * 90).astype(np.uint8)
+        sweep = np.tile(strip, (height, 1))
+        alpha = Image.fromarray((sweep.astype(np.uint16) * np.asarray(mask) // 255).astype(np.uint8))
+        highlight = Image.new('RGBA', (width, height), (237, 255, 247, 0))
+        highlight.putalpha(alpha)
+        image = Image.alpha_composite(image, highlight)
+        image = Image.alpha_composite(image, label)
+        frames.append(image.convert('RGB'))
+
+    name = 'orbit-mobile' if mobile else 'orbit'
+    metadata = PngImagePlugin.PngInfo()
+    metadata.add_text('impeccable:prompt', ORIGIN)
+    frames[22].save(ASSETS / (name + '-static.png'), pnginfo=metadata, optimize=True)
+    palette_source = Image.new('RGB', (width, height * 3))
+    for row, sample in enumerate((0, 22, 50)):
+        palette_source.paste(frames[sample], (0, row * height))
+    palette = palette_source.quantize(colors=192, method=Image.Quantize.MEDIANCUT)
     indexed = [frame.quantize(palette=palette, dither=Image.Dither.NONE) for frame in frames]
     indexed[0].save(ASSETS / (name + '.gif'), save_all=True, append_images=indexed[1:],
-                    duration=84, loop=0, optimize=True, disposal=1,
-                    comment=ORIGIN.encode())
-
-
-def deraining():
-    original = source('mslkad-comparison.png',
-        'https://raw.githubusercontent.com/Easesgr/MSLKAD/main/assets/figures/real-world-comparison.png')
-    # The top row of the published Fig. 3, first (Input) and fifth (Ours) columns.
-    rainy = original.crop((14, 36, 395, 260)).resize((1080, 635), Image.Resampling.LANCZOS)
-    restored = original.crop((1611, 36, 1992, 260)).resize((1080, 635), Image.Resampling.LANCZOS)
-    origin = ('Origin: Easesgr/MSLKAD assets/figures/real-world-comparison.png, Fig. 3. '
-              'Top-row first (Input) and fifth (Ours) panels cropped at identical 381x224 sizes, '
-              'resized with LANCZOS and revealed with a divider. No image enhancement or synthetic restoration.')
-    frames = []
-    for frame in range(72):
-        # Pause at both ends, then move through the paired real figure crops.
-        phase = frame / 72
-        progress = (1 - math.cos(2 * math.pi * phase)) / 2
-        x = round(1080 * (.04 + .92 * progress))
-        image = Image.new('RGB', (1120, 742), BACKGROUND)
-        image.paste(rainy, (20, 20))
-        image.paste(restored.crop((x, 0, 1080, 635)), (20 + x, 20))
-        draw = ImageDraw.Draw(image)
-        draw.line((20 + x, 20, 20 + x, 655), fill=MINT, width=3)
-        draw.rectangle((24, 32, 162, 80), fill=BACKGROUND)
-        draw.rectangle((860, 32, 1088, 80), fill=BACKGROUND)
-        text(draw, (38, 37), 'INPUT', 29, bold=True)
-        text(draw, (885, 37), 'MSLKAD', 29, bold=True)
-        text(draw, (30, 684), 'Single-image deraining', 26, bold=True)
-        text(draw, (835, 684), 'ICIP 2026', 26, AMBER, bold=True)
-        frames.append(image)
-    # The still shows two equally sized halves with the same divider.
-    frames[18].save(ASSETS / 'deraining-static.webp', quality=88, method=6,
-                    exif=exif(origin))
-    provenance('deraining-static.webp', origin)
-    gif_frames = [frame.resize((840, 556), Image.Resampling.LANCZOS) for frame in frames]
-    palette = gif_frames[18].quantize(colors=256, method=Image.Quantize.MEDIANCUT)
-    indexed = [frame.quantize(palette=palette, dither=Image.Dither.FLOYDSTEINBERG) for frame in gif_frames]
-    indexed[0].save(ASSETS / 'deraining.gif', save_all=True, append_images=indexed[1:],
-                    duration=84, loop=0, optimize=True, disposal=1, comment=origin.encode())
-
-
-def previews():
-    rows = [('dialogue-converter.png', 'dialogue-preview.webp',
-             'https://raw.githubusercontent.com/Easesgr/dialogue-converter/main/docs/images/demo.png', 1120),
-            ('learning-site.png', 'learning-preview.webp',
-             'https://raw.githubusercontent.com/Easesgr/anyiai-docs/main/docs/screenshots/home.png', 1440)]
-    for source_name, target_name, url, width in rows:
-        image = source(source_name, url)
-        image.thumbnail((width, width), Image.Resampling.LANCZOS)
-        description = 'Origin: existing public project screenshot, resized without altering its contents. ' + url
-        image.save(ASSETS / target_name, quality=86, method=6,
-                   exif=exif(description))
-        provenance(target_name, description)
+                    duration=80, loop=0, optimize=True, disposal=1, comment=ORIGIN.encode())
 
 
 if __name__ == '__main__':
-    ASSETS.mkdir(exist_ok=True)
     hero(False)
     hero(True)
-    deraining()
-    previews()
-    for path in sorted(ASSETS.glob('*')):
-        if path.is_file():
-            print(f'{path.name}: {path.stat().st_size:,} bytes')
+    for name in ('orbit.gif', 'orbit-mobile.gif', 'orbit-static.png', 'orbit-mobile-static.png'):
+        print(f'{name}: {(ASSETS / name).stat().st_size:,} bytes')
